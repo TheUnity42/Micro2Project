@@ -2,6 +2,7 @@ import sqlite3
 import numpy as np
 import zlib
 import io
+import tensorflow as tf
 
 def Enable_SQLite_Image_Compressor():    
     def adapt_array(arr):
@@ -19,7 +20,23 @@ def Enable_SQLite_Image_Compressor():
     sqlite3.register_converter("array", convert_array)
 
 
+def Extract_TF_Dataset(db, map_func=None):
+    Enable_SQLite_Image_Compressor()
+    conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
+    c = conn.cursor()
+    c.execute("SELECT img, label FROM data;")
+    data = c.fetchall()
+    conn.close()
 
+    imgs, labels = map(list, zip(*data))
+    imgs = np.asarray(imgs, dtype=np.uint8)
+
+    print(len(imgs))
+
+    # Create a dataset of images and labels
+    dataset = tf.data.Dataset.from_tensor_slices((imgs, labels))
+
+    return dataset
 
 # class SQLiteImageLoader:
 #     def __init__(self, db_path, zip_mode=True):

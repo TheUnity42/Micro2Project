@@ -28,7 +28,7 @@ def main():
             t = "scissors"
         else:
             continue
-        data = np.asarray(imageio.imread(path))
+        data = np.asarray(imageio.imread(path), dtype=np.uint8)
         assert type(data) == np.ndarray
         c.execute("INSERT INTO data VALUES (NULL, ?, ?)", (data, t))
         if t == "rock":

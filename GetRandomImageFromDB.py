@@ -1,4 +1,4 @@
-from SQLTools import Enable_SQLite_Image_Compressor
+from SQLTools import Enable_SQLite_Image_Compressor, Extract_TF_Dataset
 import numpy as np
 import sqlite3
 import matplotlib.pyplot as plt
@@ -37,5 +37,6 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         print("Usage: python3 GetRandomImageFromDB.py <db_path>")
         exit(1)
-    main(sys.argv[1])
+    # main(sys.argv[1])
+    Extract_TF_Dataset(sys.argv[1])
     exit(0)
