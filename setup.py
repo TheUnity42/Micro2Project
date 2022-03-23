@@ -5,11 +5,19 @@ import sqlite3
 import re
 import glob
 import tqdm
+import kaggle
+import sys
 
 
-def main():
-    # activate the SQLite image compressor
-    Enable_SQLite_Image_Compressor()
+def ProcessKaggle():
+
+    print("Downloading Kaggle data...")
+    # fetch the dataset
+    kaggle.api.authenticate()
+    kaggle.api.dataset_download_files(
+        "drgfreeman/rockpaperscissors", "./Data/Kaggle/", unzip=True)
+
+    print("Processing Kaggle data...")
     # create a sqlite database
     db_path = './Database/kaggle_data.db'
     conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
@@ -40,8 +48,21 @@ def main():
 
     conn.commit()
     conn.close()
-    print(f"Wrote {counts[0] + counts[1] + counts[2]} entries. ({counts[0]} rock, {counts[1]} paper, {counts[2]} scissors)")
+    print(
+        f"Wrote {counts[0] + counts[1] + counts[2]} entries. ({counts[0]} rock, {counts[1]} paper, {counts[2]} scissors)")
 
+
+
+def main(cmd):
+    # activate the SQLite image compressor
+    Enable_SQLite_Image_Compressor()
+    
+    if cmd == "install":
+        ProcessKaggle()
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) < 2:
+        print("Usage: python3 setup.py <install>")
+        sys.exit(1)
+    main(sys.argv[1])
+    sys.exit(0)

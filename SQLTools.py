@@ -31,7 +31,8 @@ def Extract_TF_Dataset(db, map_func=None):
     imgs, labels = map(list, zip(*data))
     imgs = np.asarray(imgs, dtype=np.uint8)
 
-    print(len(imgs))
+    if map_func is not None:
+        labels = list(map(map_func, labels))
 
     # Create a dataset of images and labels
     dataset = tf.data.Dataset.from_tensor_slices((imgs, labels))
