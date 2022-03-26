@@ -1,4 +1,6 @@
+from ctypes.wintypes import RGB
 import tensorflow as tf
+import numpy as np
 import cv2
 import os
 import sys
@@ -15,7 +17,7 @@ def main(model_path):
     print("Model loaded.")
 
     # connect to webcam
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
 
     # run in a loop until user presses 'q' or 'esc'
     while True:
@@ -26,20 +28,37 @@ def main(model_path):
             print("Error reading frame.")
             break
 
+        # mirror the frame
+        frame = cv2.flip(frame, 1)
+
         # convert to RGB
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # resize to fit the model
-        frame = cv2.resize(gray, (224, 224))
-
-        # add a dimension to the image
-        frame = frame[..., None]
+        crop_frame = cv2.resize(rgb, (224, 224))
+        crop_frame = tf.convert_to_tensor(crop_frame, dtype=tf.float32)
 
         # predict the class
-        prediction = model.predict(frame)
+        prediction = model.predict(crop_frame[None, :, :, :])[0]
 
         # print the prediction
         print(prediction)
+
+        # calculate the x and y scale factors
+        x_scale = frame.shape[1] / 224
+        y_scale = frame.shape[0] / 224
+
+        # scale the prediction
+        prediction[0] = prediction[0] * y_scale
+        prediction[1] = prediction[1] * x_scale
+        prediction[2] = prediction[2] * y_scale
+        prediction[3] = prediction[3] * x_scale
+
+        # cast to int
+        prediction = prediction.astype(np.int32)
+
+        # draw the bounding box
+        cv2.rectangle(frame, (prediction[1], prediction[0]), (prediction[3], prediction[2]), (0, 255, 0), 2)
 
         # show the frame
         cv2.imshow("frame", frame)
