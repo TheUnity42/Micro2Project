@@ -104,20 +104,16 @@ def ProcessJoints(dir):
         data_array[:, 0] = data_array[:, 0] / data.shape[1]
         data_array[:, 1] = data_array[:, 1] / data.shape[0]
 
-        # map box to image size
-        box_array[0] = box_array[0] / data.shape[1]
-        box_array[1] = box_array[1] / data.shape[0]
-        box_array[2] = box_array[2] / data.shape[1]
-        box_array[3] = box_array[3] / data.shape[0]
-
-        # map box from [Top, Left, Bottom, Right] to [Top, Left, Width, Height]
-        width = box_array[3] - box_array[1]
-        height = box_array[2] - box_array[0]
-        box_array[2] = width
-        box_array[3] = height
+        # map box from [Top, Left, Bottom, Right] to [Bottom, Left, Width, Height]
+        bbox = np.zeros(4, dtype=np.float32)
+        bbox[0] = box_array[0, 0]
+        bbox[1] = box_array[1, 0]
+        bbox[2] = box_array[2, 0]
+        bbox[3] = box_array[3, 0]
         
         # insert the data into the database
-        c.execute("INSERT INTO data VALUES (NULL, ?, ?, ?)", (data, data_array, box_array))
+        c.execute("INSERT INTO data VALUES (NULL, ?, ?, ?)",
+                  (data, data_array, bbox))
 
         # reduce the images to a smaller size (224x224)
         data_lite = PIL.Image.fromarray(data)
@@ -125,13 +121,13 @@ def ProcessJoints(dir):
         data_lite = np.asarray(data_lite, dtype=np.uint8)
 
         # adjust bbox to new image size
-        box_array[0] = box_array[0] * 224 / data.shape[0]
-        box_array[1] = box_array[1] * 224 / data.shape[1]
-        box_array[2] = box_array[2] * 224 / data.shape[0]
-        box_array[3] = box_array[3] * 224 / data.shape[1]
+        bbox[0] = bbox[0] * 224 / data.shape[0]
+        bbox[1] = bbox[1] * 224 / data.shape[1]
+        bbox[2] = bbox[2] * 224 / data.shape[0]
+        bbox[3] = bbox[3] * 224 / data.shape[1]
 
         # insert the data into the database
-        c_lite.execute("INSERT INTO data VALUES (NULL, ?, ?, ?)", (data_lite, data_array, box_array))
+        c_lite.execute("INSERT INTO data VALUES (NULL, ?, ?, ?)", (data_lite, data_array, bbox))
 
 
     conn.commit()
