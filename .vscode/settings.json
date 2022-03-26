@@ -1,0 +1,10 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "Joints",
+            "database": "${workspaceFolder:Micro2Project}/Database/joint_data.db"
+        }
+    ]
+}

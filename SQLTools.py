@@ -20,11 +20,11 @@ def Enable_SQLite_Image_Compressor():
     sqlite3.register_converter("array", convert_array)
 
 
-def Extract_TF_Dataset(db, map_func=None):
+def Extract_TF_Dataset(db, map_func=None, label_name='label'):
     Enable_SQLite_Image_Compressor()
     conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
     c = conn.cursor()
-    c.execute("SELECT img, label FROM data;")
+    c.execute(f"SELECT img, {label_name} FROM data;")
     data = c.fetchall()
     conn.close()
 
@@ -38,6 +38,12 @@ def Extract_TF_Dataset(db, map_func=None):
     dataset = tf.data.Dataset.from_tensor_slices((imgs, labels))
 
     return dataset
+
+
+def Fetch_Database(db):
+    Enable_SQLite_Image_Compressor()
+    conn = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
+    return conn
 
 # class SQLiteImageLoader:
 #     def __init__(self, db_path, zip_mode=True):
